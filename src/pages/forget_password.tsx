@@ -1,17 +1,31 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { useMessage } from '../context/MessageContext';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const { setMessage } = useMessage();
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     try {
       await axios.post('http://localhost:3000/api/forgot-password', { email });
-      // Handle successful request
+      setMessage('Password reset email sent');
+      navigate('/login');
     } catch (err) {
-      setError('Failed to send reset email');
+      if (err instanceof AxiosError) {
+        if (err.response && err.response.data && typeof err.response.data.message === 'string') {
+          setError(err.response.data.message);
+        } else {
+          setError('Failed to send reset email');
+        }
+      } else {
+        setError('Failed to send reset email');
+      }
     }
   };
 

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios, { AxiosError } from 'axios';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useMessage } from '../context/MessageContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const { message, setMessage } = useMessage();
   const location = useLocation();
@@ -24,17 +25,17 @@ const Login = () => {
     // Redirect based on message after successful login
     if (message) {
       const timer = setTimeout(() => {
-        navigate('/home'); // Redirect to home page
-      }, 2000); // Wait 2 seconds before redirecting
+        setMessage(''); 
+      }, 2000); 
 
       return () => clearTimeout(timer);
     }
-  }, [message, navigate]);
+  }, [message, setMessage]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/api/login', { email, password });
+      const response = await axios.post('http://localhost:3000/api/login', { email, password, rememberMe });
       // Assuming the backend returns a token upon successful login
       const { token } = response.data;
 
@@ -43,6 +44,8 @@ const Login = () => {
 
       // Set message for successful login
       setMessage('Successfully logged in');
+      navigate('/home');
+
     } catch (err) {
       if (err instanceof AxiosError) {
         if (err.response && err.response.data && typeof err.response.data.message === 'string') {
@@ -82,7 +85,20 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
+        <div className="mb-4 flex items-center">
+          <input
+            type="checkbox"
+            id="rememberMe"
+            className="mr-2"
+            checked={rememberMe}
+            onChange={() => setRememberMe(!rememberMe)}
+          />
+          <label htmlFor="rememberMe">Remember Me</label>
+        </div>
         <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">Login</button>
+        <div className="mt-4">
+          <Link to="/forgot-password" className="text-blue-500">Forgot Password?</Link>
+        </div>
       </form>
     </div>
   );
