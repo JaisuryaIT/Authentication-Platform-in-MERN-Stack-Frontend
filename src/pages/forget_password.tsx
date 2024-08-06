@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios, { AxiosError } from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useMessage } from '../context/MessageContext';
 
 const ForgotPassword = () => {
@@ -45,6 +45,9 @@ const ForgotPassword = () => {
           />
         </div>
         <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">Reset Password</button>
+        <div className="mt-4">
+          <Link to="/login" className="text-blue-500">Login Here</Link>
+        </div>
       </form>
     </div>
   );

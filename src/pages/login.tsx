@@ -99,6 +99,9 @@ const Login = () => {
         <div className="mt-4">
           <Link to="/forgot-password" className="text-blue-500">Forgot Password?</Link>
         </div>
+        <div className="mt-4">
+          <Link to="/signup" className="text-blue-500">New here?</Link>
+        </div>
       </form>
     </div>
   );

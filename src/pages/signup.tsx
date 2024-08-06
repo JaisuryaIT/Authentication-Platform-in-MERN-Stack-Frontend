@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link  } from 'react-router-dom';
 import { useMessage } from '../context/MessageContext';
 
 const Signup = () => {
@@ -201,6 +201,9 @@ const Signup = () => {
           </label>
         </div>
         <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">Sign Up</button>
+        <div className="mt-4">
+          <Link to="/Login" className="text-blue-500">Already Have an account?</Link>
+        </div>
       </form>
     </div>
   );
