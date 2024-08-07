@@ -66,8 +66,17 @@ const ResetPassword = () => {
       navigate('/login');
     } catch (err) {
       if (err instanceof AxiosError) {
-        if (err.response && err.response.data && typeof err.response.data.message === 'string') {
-          setError(err.response.data.message);
+        if (err.response) {
+          const { status, data } = err.response;
+          if (status === 400 && data.message === 'Invalid or expired token') {
+            setMessage('The token is invalid or has expired. Please request a new password reset link.');
+            navigate('/login');
+          } else if (status === 400 && data.message === 'Invalid token') {
+            setMessage('The token is invalid. Please request a new password reset link.');
+            navigate('/login');
+          } else {
+            setError('Failed to reset password');
+          }
         } else {
           setError('Failed to reset password');
         }
