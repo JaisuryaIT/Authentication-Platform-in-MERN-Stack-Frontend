@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios, { AxiosError } from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMessage } from '../context/MessageContext';
@@ -8,9 +8,37 @@ const ResetPassword = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
-  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([])
+  const [isValidToken, setIsValidToken] = useState<boolean>(true);
   const navigate = useNavigate();
   const { setMessage } = useMessage();
+
+  useEffect(() => {
+    // Verify token on component mount
+    const verifyToken = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3000/api/verify-reset-token/${token}`);
+        if (response.status !== 200) {
+          setIsValidToken(false);
+          setMessage(response.data.message);
+          navigate('/login');
+        }
+      } catch (err) {
+        if (err instanceof AxiosError && err.response) {
+          setIsValidToken(false);
+          setMessage(err.response.data.message);
+          navigate('/login');
+        } else {
+          setIsValidToken(false);
+          setMessage('Failed to verify token');
+          navigate('/login');
+        }
+      }
+    };
+
+    verifyToken();
+  }, [token, navigate, setMessage]);
+
 
   // Password validation function
   const validatePassword = (password: string) => {
@@ -47,7 +75,13 @@ const ResetPassword = () => {
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
+    // Check if the token is valid before processing password reset
+    if (!isValidToken) {
+      setError('Invalid or expired token');
+      return;
+    }
+
     // Validate password match
     if (password !== confirmPassword) {
       setError('Passwords do not match');
@@ -65,24 +99,7 @@ const ResetPassword = () => {
       setMessage('Password reset successful');
       navigate('/login');
     } catch (err) {
-      if (err instanceof AxiosError) {
-        if (err.response) {
-          const { status, data } = err.response;
-          if (status === 400 && data.message === 'Invalid or expired token') {
-            setMessage('The token is invalid or has expired. Please request a new password reset link.');
-            navigate('/login');
-          } else if (status === 400 && data.message === 'Invalid token') {
-            setMessage('The token is invalid. Please request a new password reset link.');
-            navigate('/login');
-          } else {
-            setError('Failed to reset password');
-          }
-        } else {
-          setError('Failed to reset password');
-        }
-      } else {
         setError('Failed to reset password');
-      }
     }
   };
 
